@@ -91,6 +91,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return Boolean.TRUE.equals(request.getRequestURI().equals("/login"));
+        return Boolean.TRUE.equals(request.getRequestURI().equals("/login") ||
+                request.getRequestURI().equals("/app/login"));
     }
 }

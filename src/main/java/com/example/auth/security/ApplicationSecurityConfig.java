@@ -2,7 +2,6 @@ package com.example.auth.security;
 
 import com.example.auth.auth.ApplicationUserService;
 import com.example.auth.jwt.JwtTokenVerifier;
-import com.example.auth.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 import com.example.auth.jwt.repository.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -32,8 +32,7 @@ public class ApplicationSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        AuthenticationManager authenticationManager = authenticationManager(authenticationConfiguration);
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
@@ -41,24 +40,14 @@ public class ApplicationSecurityConfig {
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/api/login", "/home").permitAll() // Public endpoints
+                        .requestMatchers("/login", "/app/login").permitAll() // Public endpoints
                         .anyRequest().authenticated() // Secured endpoints
                 )
-                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager,tokenRepository))
-                .addFilterAfter(new JwtTokenVerifier(tokenRepository), JwtUsernameAndPasswordAuthenticationFilter.class);
+
+                // Add JWT Token Verifier filter
+                .addFilterAfter(new JwtTokenVerifier(tokenRepository), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-//                .formLogin((form) -> form
-//                        .loginPage("/login")
-//                        .permitAll()
-//                        .defaultSuccessUrl("/home",false)
-//                )
-//                .logout((logout) -> logout.permitAll())
-//                .exceptionHandling((exceptions) -> exceptions
-//                        .accessDeniedPage("/access-denied") // Custom access denied page
-//                );
-//
-//        return http.build();
     }
 
     @Bean

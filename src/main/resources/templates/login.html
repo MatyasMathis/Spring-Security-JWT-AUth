@@ -18,6 +18,10 @@
         </div>
         <button type="button" class="btn btn-primary" onclick="submitLogin()">Login</button>
     </form>
+    <div id="errorAlert" class="alert alert-danger mt-3 d-none"></div>
+    <div id="loadingSpinner" class="spinner-border text-primary d-none mt-3" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
 </div>
 <script>
     function submitLogin() {
@@ -26,7 +30,11 @@
             password: document.getElementById('password').value
         };
 
-        fetch('/login', {
+        // Hide error and show spinner
+        document.getElementById('errorAlert').classList.add('d-none');
+        document.getElementById('loadingSpinner').classList.remove('d-none');
+
+        fetch('/app/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -34,13 +42,22 @@
             body: JSON.stringify(formData)
         })
             .then(response => {
+                document.getElementById('loadingSpinner').classList.add('d-none'); // Hide spinner
+
                 if (response.ok) {
-                    alert('Login successful!');
+                    // Redirect to the home page
+                    window.location.href = '/home';
                 } else {
-                    alert('Login failed!');
+                    document.getElementById('errorAlert').classList.remove('d-none');
+                    document.getElementById('errorAlert').innerText = 'Invalid username or password!';
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                document.getElementById('loadingSpinner').classList.add('d-none'); // Hide spinner
+                document.getElementById('errorAlert').classList.remove('d-none');
+                document.getElementById('errorAlert').innerText = 'An error occurred. Please try again later.';
+                console.error('Error:', error);
+            });
     }
 </script>
 </body>
